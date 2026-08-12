@@ -1,6 +1,5 @@
 import streamlit as st
 import sys
-import os
 from pathlib import Path
 
 import toml
@@ -18,6 +17,9 @@ st.set_page_config(
 
 # 定义页面
 pages = {
+    "🏠 首页": [
+        st.Page("./admin/home.py", title="项目概览", icon="🏠")
+    ],
     "📋 管理模块": [
         st.Page("./admin/data_collection.py", title="数据采集", icon="📥"),
         st.Page("./admin/data_processing.py", title="数据处理", icon="🔄")
@@ -38,7 +40,6 @@ try:
 except FileNotFoundError:
     st.error("未找到配置文件，请确保 .streamlit/secrets.toml 文件存在")
     st.stop()
-
 
 # 创建导航
 nav = st.navigation(

@@ -122,14 +122,18 @@ def simplify_wind_force(data: pd.DataFrame) -> pd.DataFrame:
 
     # 根据蒲福风等级分类
     def get_wind_category(wind_force) -> str:
-        if ('1' or '2' or '3' or '微') in wind_force:
+        if pd.isna(wind_force):
             return '微风'
-        elif ('4' or '5') in wind_force:
+        wf = str(wind_force)
+        if any(c in wf for c in ['1', '2', '3', '微']):
+            return '微风'
+        elif any(c in wf for c in ['4', '5']):
             return '清风'
-        elif ('6' or '7') in wind_force:
+        elif any(c in wf for c in ['6', '7']):
             return '强风'
-        elif '8' in wind_force:
+        elif '8' in wf:
             return '大风'
+        return '微风'
 
     data['wind_force_day'] = data['wind_force_day'].apply(get_wind_category)
     data['wind_force_night'] = data['wind_force_night'].apply(get_wind_category)
@@ -187,8 +191,8 @@ def temp_format(data: pd.DataFrame) -> pd.DataFrame:
         st.dataframe(data[['max_temp', 'min_temp']], hide_index=True)
 
     # 气温格式处理
-    data['max_temp'] = data['max_temp'].apply(lambda t: t.replace('℃', '')).astype(int)
-    data['min_temp'] = data['min_temp'].apply(lambda t: t.replace('℃', '')).astype(int)
+    data['max_temp'] = data['max_temp'].apply(lambda t: str(t).replace('℃', '').strip() if pd.notna(t) else 0).astype(int)
+    data['min_temp'] = data['min_temp'].apply(lambda t: str(t).replace('℃', '').strip() if pd.notna(t) else 0).astype(int)
     data['avg_temp'] = (data['max_temp'] + data['min_temp']) / 2
     # 使用第二列展示气温数据（处理后）
     with col2:

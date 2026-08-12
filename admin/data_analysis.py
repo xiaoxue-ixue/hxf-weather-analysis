@@ -198,12 +198,10 @@ def bar_chart(data: pd.Series, lable: str, title: str, type: Literal['bar', 'bar
 
     # ai解读图表
     if st.session_state.is_ai:
-        # 将内存中的图表保存为本地图片文件
-        img_path = f"temp_{title}.png"
+        # 保存图表为临时图片文件
+        img_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", f"temp_{title}.png")
         fig.savefig(img_path, bbox_inches='tight')
-
-        # 传入图片路径进行解读 (根据 ai_chart_interpretation 的定义，只需传 image_path)
-        aci.chart_interpretation(image_path=img_path)
+        aci.chart_interpretation(img_path)
 
     # 释放资源
     plt.close(fig)
@@ -238,7 +236,7 @@ def word_cloud_chart(data: pd.Series, title: str) -> None:
 
     # ai解读图表
     if st.session_state.is_ai:
-        aci.ai_chart_interpretation(image_path, image_url)
+        aci.chart_interpretation(image_path)
     # 释放资源
     plt.close(fig)
 
@@ -384,6 +382,15 @@ elif page == '综合仪表盘':
     # 添加数据过滤，返回过滤后的数据和开关状态
     df, toggle = data_filter(df)
     show_metric(df)
+    # 数据导出
+    csv = df.to_csv(index=False).encode('utf-8-sig')
+    st.download_button(
+        label="📥 导出当前数据为 CSV",
+        data=csv,
+        file_name=f"天气数据_{st.session_state.get('city_name', '全部')}.csv",
+        mime="text/csv",
+        use_container_width=False
+    )
     if toggle == '图表':
         # 展示图表
         # 第一行的3列：显示白天的数据分布
